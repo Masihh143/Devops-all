@@ -1,7 +1,7 @@
 # Linux Fundamentals
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 ---
 

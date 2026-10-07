@@ -14,7 +14,7 @@ export default function App() {
       <h1>Hello World from React</h1>
       <p>This React app was built with Vite and is served by Nginx inside a Docker container</p>
       <p>
-        Name: Sumit Akhuli &nbsp;|&nbsp; Enrollment No: 24bcs10158
+        Name: Mohammed Masihuddin &nbsp;|&nbsp; Enrollment No: 24bcs10570
       </p>
       <button
         onClick={() => setCount((c) => c + 1)}

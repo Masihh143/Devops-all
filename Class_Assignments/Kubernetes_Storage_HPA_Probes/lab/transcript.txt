@@ -228,16 +228,16 @@ Name:             web-app-f9769fb4-ldkkn
     Startup:      http-get http://:http/ delay=0s timeout=1s period=2s successThreshold=1 failureThreshold=30
 No resources found in production-webapp namespace.
 
-$ P=$(kubectl get pods -n production-webapp -l app=web-app -o jsonpath="{.items[0].metadata.name}"); kubectl exec -n production-webapp $P -- sh -c "echo \"Student: Sumit Akhuli (24bcs10158)\" > /data/student.txt; cat /data/student.txt"; kubectl delete pod -n production-webapp $P --wait=true; kubectl rollout status deploy/web-app -n production-webapp --timeout=120s >/dev/null; kubectl get pods -n production-webapp; for p in $(kubectl get pods -n production-webapp -l app=web-app -o name); do echo "$p:"; kubectl exec -n production-webapp $p -- cat /data/student.txt; done
-Student: Sumit Akhuli (24bcs10158)
+$ P=$(kubectl get pods -n production-webapp -l app=web-app -o jsonpath="{.items[0].metadata.name}"); kubectl exec -n production-webapp $P -- sh -c "echo \"Student: Mohammed Masihuddin (24bcs10570)\" > /data/student.txt; cat /data/student.txt"; kubectl delete pod -n production-webapp $P --wait=true; kubectl rollout status deploy/web-app -n production-webapp --timeout=120s >/dev/null; kubectl get pods -n production-webapp; for p in $(kubectl get pods -n production-webapp -l app=web-app -o name); do echo "$p:"; kubectl exec -n production-webapp $p -- cat /data/student.txt; done
+Student: Mohammed Masihuddin (24bcs10570)
 pod "web-app-f9769fb4-9574s" deleted from production-webapp namespace
 NAME                     READY   STATUS    RESTARTS   AGE
 web-app-f9769fb4-ldkkn   1/1     Running   0          31s
 web-app-f9769fb4-xmzt7   1/1     Running   0          10s
 pod/web-app-f9769fb4-ldkkn:
-Student: Sumit Akhuli (24bcs10158)
+Student: Mohammed Masihuddin (24bcs10570)
 pod/web-app-f9769fb4-xmzt7:
-Student: Sumit Akhuli (24bcs10158)
+Student: Mohammed Masihuddin (24bcs10570)
 
 $ kubectl exec -n production-webapp web-app-f9769fb4-ldkkn -- rm /usr/share/nginx/html/index.html; sleep 25; kubectl get pods -n production-webapp; kubectl get endpointslices -n production-webapp -o jsonpath='{range .items[*].endpoints[*]}{.targetRef.name} ready={.conditions.ready}{"\n"}{end}'
 NAME                     READY   STATUS    RESTARTS      AGE
@@ -295,4 +295,3 @@ web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          
 NAME                     CPU(cores)   MEMORY(bytes)   
 web-app-f9769fb4-ldkkn   1m           8Mi             
 web-app-f9769fb4-xmzt7   1m           8Mi             
-

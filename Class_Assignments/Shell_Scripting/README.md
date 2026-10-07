@@ -1,7 +1,7 @@
 # Shell Scripting
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 ---
 
@@ -53,8 +53,8 @@ Every required item, and where it is in the script:
 # ============================================================
 #  System Information Script
 #  Shell Scripting Homework
-#  Name        : Sumit Akhuli
-#  Enrollment  : 24bcs10158
+#  Name        : Mohammed Masihuddin
+#  Enrollment  : 24bcs10570
 #
 #  Demonstrates: variables, echo, date, hostname, whoami, df,
 #                ps, read -p, mkdir, touch, > output redirection

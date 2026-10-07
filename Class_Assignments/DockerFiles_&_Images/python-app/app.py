@@ -14,7 +14,7 @@ def hello():
 <body style="font-family: system-ui, sans-serif; text-align:center; padding:60px;">
   <h1>Hello World from Python</h1>
   <p>Deployed with a multi-stage Dockerfile (wheels built in stage 1)</p>
-  <p>Name: Sumit Akhuli &nbsp;|&nbsp; Enrollment No: 24bcs10158</p>
+  <p>Name: Mohammed Masihuddin &nbsp;|&nbsp; Enrollment No: 24bcs10570</p>
   <p>Container hostname: {socket.gethostname()}</p>
   <p>Python version: {sys.version.split()[0]}</p>
 </body></html>"""

@@ -1,7 +1,7 @@
 # Complete CI/CD & DevSecOps (Session 17)
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 A complete CI/CD + DevSecOps pipeline for the class demo app (`session-17-devsecops/demo`, the
 Flask "DevSecOps Hub" dashboard). Every stage in the expected flow is a separate GitHub Actions

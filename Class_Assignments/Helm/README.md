@@ -1,7 +1,7 @@
 # Helm (Session 15)
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 Every command and output below was captured from a real run on my machine — Helm `v4.3.0`,
 Minikube with Kubernetes `v1.37.0` (`docker` driver), macOS on Apple Silicon. The mini project

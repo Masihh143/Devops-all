@@ -1,7 +1,7 @@
 # Kubernetes Fundamentals
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 Run on Minikube `v1.39.0` (`docker` driver), Kubernetes `v1.37.0`, macOS Apple Silicon (`arm64`).
 

@@ -1,7 +1,7 @@
 # Terraform & Infrastructure as Code (Session 18)
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 **Infrastructure as Code (IaC)** means writing infrastructure — buckets, networks, servers — as
 code files instead of clicking through the AWS console. The files go into Git, so infrastructure

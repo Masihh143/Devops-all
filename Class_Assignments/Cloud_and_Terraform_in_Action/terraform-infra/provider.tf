@@ -22,7 +22,7 @@ provider "aws" {
       Project   = var.project
       Session   = "19"
       ManagedBy = "Terraform"
-      Owner     = "Sumit Akhuli"
+      Owner     = "Mohammed Masihuddin"
     }
   }
 }

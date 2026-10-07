@@ -1,7 +1,7 @@
 # CI/CD & GitHub Actions (Session 16)
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 A complete CI/CD demo project built on the class example `10-final-cicd-pipeline`: the same
 calculator, turned into a small Flask API with a Dockerfile, a GitHub Actions workflow with CI

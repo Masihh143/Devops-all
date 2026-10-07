@@ -1,7 +1,7 @@
 # Kubernetes Storage, HPA & Probes (Session 13)
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 Every command and output below was captured from a real run on my machine — Minikube
 (`docker` driver), Kubernetes `v1.37.0`, with the `metrics-server` and `storage-provisioner`
@@ -499,21 +499,21 @@ ever finished starting.
 
 ```bash
 P=$(kubectl get pods -n production-webapp -l app=web-app -o jsonpath="{.items[0].metadata.name}")
-kubectl exec -n production-webapp $P -- sh -c 'echo "Student: Sumit Akhuli (24bcs10158)" > /data/student.txt'
+kubectl exec -n production-webapp $P -- sh -c 'echo "Student: Mohammed Masihuddin (24bcs10570)" > /data/student.txt'
 kubectl delete pod -n production-webapp $P
 # read the file from every pod
 ```
 
 ```
-Student: Sumit Akhuli (24bcs10158)
+Student: Mohammed Masihuddin (24bcs10570)
 pod "web-app-f9769fb4-9574s" deleted from production-webapp namespace
 NAME                     READY   STATUS    RESTARTS   AGE
 web-app-f9769fb4-ldkkn   1/1     Running   0          31s
 web-app-f9769fb4-xmzt7   1/1     Running   0          10s
 pod/web-app-f9769fb4-ldkkn:
-Student: Sumit Akhuli (24bcs10158)
+Student: Mohammed Masihuddin (24bcs10570)
 pod/web-app-f9769fb4-xmzt7:
-Student: Sumit Akhuli (24bcs10158)
+Student: Mohammed Masihuddin (24bcs10570)
 ```
 
 The Deployment replaced the deleted Pod (`xmzt7`), and both the surviving Pod and the new one

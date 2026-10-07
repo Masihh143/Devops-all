@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
   <head><title>Docker Multi-Stage Build</title></head>
   <body style="font-family: system-ui, sans-serif; text-align: center; padding: 60px;">
     <h1>Hello World from Docker multi-stage build</h1>
-    <p>Name: Sumit Akhuli &nbsp;|&nbsp; Enrollment No: 24bcs10158</p>
+    <p>Name: Mohammed Masihuddin &nbsp;|&nbsp; Enrollment No: 24bcs10570</p>
     <hr style="max-width:520px; margin:30px auto; border:none; border-top:1px solid #ddd;">
     <p>Container hostname: ${os.hostname()}</p>
     <p>Listening on port: ${PORT}</p>

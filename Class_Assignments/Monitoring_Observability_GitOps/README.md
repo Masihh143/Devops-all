@@ -1,7 +1,7 @@
 # Monitoring, Observability & GitOps (Session 20)
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 Three demos, all run for real on my machine (macOS, Apple Silicon, Docker Desktop, Minikube
 with Kubernetes `v1.37.0`):

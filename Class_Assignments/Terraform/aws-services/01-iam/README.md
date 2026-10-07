@@ -1,7 +1,7 @@
 # IAM — Identity and Access Management (Governance)
 
-**Name:** Sumit Akhuli
-**Enrollment No:** 24bcs10158
+**Name:** Mohammed Masihuddin
+**Enrollment No:** 24bcs10570
 
 IAM is the AWS service that decides **who** can call AWS and **what** they are allowed to do. Every API request (console click, CLI command, SDK call, Terraform apply) is checked by IAM before it runs. It exists so that one AWS account can be shared safely by many people and programs, each with only the access they need. IAM is a global service and has no extra charge.
 
