@@ -1,9 +1,294 @@
-import React,{useEffect,useState} from 'react'; import {createRoot} from 'react-dom/client'; import './styles.css';
-const API='/api';
-function App(){const [tasks,setTasks]=useState([]),[stats,setStats]=useState({total:0,todo:0,inProgress:0,done:0}),[filter,setFilter]=useState('ALL'),[showForm,setShowForm]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState('');
- const load=async()=>{try{setError('');const [a,b]=await Promise.all([fetch(`${API}/tasks`),fetch(`${API}/tasks/stats`)]);if(!a.ok||!b.ok)throw Error('Backend unavailable');setTasks(await a.json());setStats(await b.json())}catch(e){setError(e.message)}finally{setLoading(false)}};
- useEffect(()=>{load()},[]); const visible=filter==='ALL'?tasks:tasks.filter(t=>t.status===filter);
- const update=async(t)=>{const next=t.status==='TODO'?'IN_PROGRESS':t.status==='IN_PROGRESS'?'DONE':'TODO';await fetch(`${API}/tasks/${t.id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...t,status:next})});load()};
- const create=async(e)=>{e.preventDefault();const f=new FormData(e.currentTarget);await fetch(`${API}/tasks`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:f.get('title'),description:f.get('description'),priority:f.get('priority'),assignee:f.get('assignee'),status:'TODO'})});e.currentTarget.reset();setShowForm(false);load()};
- return <div className="app"><aside className="sidebar"><div className="brand"><span className="brand-mark">T</span><div><b>TaskBoard</b><small>DevOps Capstone</small></div></div><nav><a className="active">▦ <span>Dashboard</span></a><a>✓ <span>My Tasks</span></a><a>◫ <span>Projects</span></a><a>◌ <span>Activity</span></a></nav><div className="side-bottom"><div className="upgrade"><strong>Ship with confidence.</strong><p>Build, deploy and observe your application.</p></div><div className="profile"><div className="avatar">NR</div><div><b>Nensi Ravaliya</b><small>Developer</small></div><span>⋮</span></div></div></aside><main className="main"><header><div><p className="eyebrow">WORKSPACE / OVERVIEW</p><h1>Good morning, Nensi 👋</h1><p className="muted">Here’s what’s happening with your team today.</p></div><button className="primary" onClick={()=>setShowForm(true)}>＋ New task</button></header>{error&&<div className="alert">⚠ {error}. Start the backend and PostgreSQL, then refresh.</div>}<section className="stats"><Stat label="Total tasks" value={stats.total} icon="▦"/><Stat label="To do" value={stats.todo} icon="○"/><Stat label="In progress" value={stats.inProgress} icon="◔"/><Stat label="Completed" value={stats.done} icon="✓"/></section><section className="content-grid"><div className="panel tasks-panel"><div className="panel-head"><div><h2>Tasks</h2><p className="muted">Track work across the product team.</p></div><div className="filters">{['ALL','TODO','IN_PROGRESS','DONE'].map(x=><button className={filter===x?'selected':''} onClick={()=>setFilter(x)} key={x}>{x==='ALL'?'All':x.replace('_',' ')}</button>)}</div></div>{loading?<div className="empty">Loading tasks…</div>:<div className="table-wrap"><table><thead><tr><th>Task</th><th>Assignee</th><th>Priority</th><th>Status</th><th></th></tr></thead><tbody>{visible.map(t=><tr key={t.id}><td><div className="task-title"><span className={`dot ${t.status.toLowerCase()}`}></span><div><b>{t.title}</b><small>{t.description}</small></div></div></td><td>{t.assignee}</td><td><span className={`priority ${t.priority.toLowerCase()}`}>{t.priority}</span></td><td><span className={`status ${t.status.toLowerCase()}`}>{t.status.replace('_',' ')}</span></td><td><button className="icon-btn" onClick={()=>update(t)} title="Advance status">↻</button></td></tr>)}</tbody></table>{!visible.length&&<div className="empty">No tasks in this filter.</div>}</div>}</div><aside className="panel activity"><div className="panel-head"><div><h2>Recent activity</h2><p className="muted">Latest workspace events.</p></div></div><Activity icon="✓" text="Monitoring dashboard completed" time="12 min ago"/><Activity icon="◔" text="Release task moved to in progress" time="38 min ago"/><Activity icon="＋" text="New onboarding task created" time="1 hr ago"/><Activity icon="↗" text="Deployment pipeline passed" time="2 hrs ago"/><div className="pipeline"><span>CI</span><i></i><span>Build</span><i></i><span>Scan</span><i></i><span>Deploy</span></div></aside></section>{showForm&&<div className="modal-backdrop"><form className="modal" onSubmit={create}><div className="modal-head"><div><p className="eyebrow">CREATE TASK</p><h2>Add a new task</h2></div><button type="button" className="close" onClick={()=>setShowForm(false)}>×</button></div><label>Task title<input name="title" required placeholder="e.g. Configure production ingress"/></label><label>Description<textarea name="description" placeholder="What needs to be done?"/></label><div className="form-row"><label>Priority<select name="priority"><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label><label>Assignee<input name="assignee" defaultValue="Nensi Ravaliya"/></label></div><button className="primary full">Create task</button></form></div>}</main></div>}
-function Stat({label,value,icon}){return <div className="stat"><div className="stat-icon">{icon}</div><div><small>{label}</small><strong>{value}</strong><span>Updated just now</span></div></div>}; function Activity({icon,text,time}){return <div className="activity-row"><span className="activity-icon">{icon}</span><div><b>{text}</b><small>{time}</small></div></div>}; createRoot(document.getElementById('root')).render(<App/>);
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import './styles.css';
+
+const API = '/api';
+const STATUSES = ['TODO', 'IN_PROGRESS', 'DONE'];
+const STATUS_LABEL = { TODO: 'To do', IN_PROGRESS: 'In progress', DONE: 'Done' };
+const PRIORITY_LABEL = { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High' };
+const PRIORITY_RANK = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+
+async function api(path, options = {}) {
+  const res = await fetch(`${API}${path}`, {
+    headers: options.body ? { 'Content-Type': 'application/json' } : undefined,
+    ...options,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const detail = Array.isArray(body.detail) ? body.detail.map((d) => d.msg).join(', ') : body.detail;
+    throw new Error(detail || `Request failed (${res.status})`);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+const fmtDate = (iso) =>
+  new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+function App() {
+  const [tasks, setTasks] = useState([]);
+  const [stats, setStats] = useState({ total: 0, todo: 0, inProgress: 0, done: 0 });
+  const [status, setStatus] = useState('ALL');
+  const [priority, setPriority] = useState('ALL');
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('newest');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [editing, setEditing] = useState(null); // null | 'new' | task
+  const [toast, setToast] = useState('');
+
+  const notify = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
+
+  const load = useCallback(async () => {
+    try {
+      const [list, summary] = await Promise.all([api('/tasks'), api('/tasks/stats')]);
+      setTasks(list);
+      setStats(summary);
+      setError('');
+    } catch (e) {
+      setError(e.message === 'Failed to fetch' ? 'Cannot reach the TaskBoard API.' : e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const run = async (action, message) => {
+    try {
+      await action();
+      await load();
+      if (message) notify(message);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const setTaskStatus = (task, next) =>
+    run(() => api(`/tasks/${task.id}`, { method: 'PUT', body: JSON.stringify({ status: next }) }));
+
+  const remove = (task) => {
+    if (!window.confirm(`Delete "${task.title}"?`)) return;
+    run(() => api(`/tasks/${task.id}`, { method: 'DELETE' }), 'Task deleted');
+  };
+
+  const save = async (data, id) => {
+    const isNew = id == null;
+    await api(isNew ? '/tasks' : `/tasks/${id}`, {
+      method: isNew ? 'POST' : 'PUT',
+      body: JSON.stringify(data),
+    });
+    await load();
+    notify(isNew ? 'Task created' : 'Task updated');
+  };
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = tasks.filter(
+      (t) =>
+        (status === 'ALL' || t.status === status) &&
+        (priority === 'ALL' || t.priority === priority) &&
+        (!q || `${t.title} ${t.description} ${t.assignee}`.toLowerCase().includes(q)),
+    );
+    const sorters = {
+      newest: (a, b) => b.id - a.id,
+      oldest: (a, b) => a.id - b.id,
+      priority: (a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || b.id - a.id,
+      title: (a, b) => a.title.localeCompare(b.title),
+    };
+    return [...list].sort(sorters[sort]);
+  }, [tasks, status, priority, query, sort]);
+
+  const pct = stats.total ? Math.round((stats.done / stats.total) * 100) : 0;
+
+  return (
+    <div className="page">
+      <header className="topbar">
+        <div className="brand">
+          <span className="logo">T</span>
+          <div>
+            <h1>TaskBoard</h1>
+            <p>Plan, track and finish work</p>
+          </div>
+        </div>
+        <button className="btn primary" onClick={() => setEditing('new')}>
+          + New task
+        </button>
+      </header>
+
+      {error && (
+        <div className="alert" role="alert">
+          <span>{error}</span>
+          <button className="btn small" onClick={load}>Retry</button>
+        </div>
+      )}
+
+      <section className="stats" aria-label="Summary">
+        <Stat label="Total" value={stats.total} tone="blue" />
+        <Stat label="To do" value={stats.todo} tone="amber" />
+        <Stat label="In progress" value={stats.inProgress} tone="violet" />
+        <Stat label="Done" value={stats.done} tone="green" />
+        <div className="stat progress">
+          <span className="stat-label">Completion</span>
+          <strong>{pct}%</strong>
+          <div className="bar"><i style={{ width: `${pct}%` }} /></div>
+        </div>
+      </section>
+
+      <section className="toolbar">
+        <input
+          type="search"
+          placeholder="Search title, description or owner…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search tasks"
+        />
+        <div className="tabs" role="tablist">
+          {['ALL', ...STATUSES].map((s) => (
+            <button key={s} className={status === s ? 'on' : ''} onClick={() => setStatus(s)}>
+              {s === 'ALL' ? 'All' : STATUS_LABEL[s]}
+            </button>
+          ))}
+        </div>
+        <select value={priority} onChange={(e) => setPriority(e.target.value)} aria-label="Priority filter">
+          <option value="ALL">Any priority</option>
+          {Object.entries(PRIORITY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+        <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="priority">Priority</option>
+          <option value="title">Title A–Z</option>
+        </select>
+      </section>
+
+      <section className="list">
+        {loading ? (
+          <div className="empty">Loading tasks…</div>
+        ) : visible.length === 0 ? (
+          <div className="empty">
+            {tasks.length === 0 ? 'No tasks yet — create your first one.' : 'No tasks match these filters.'}
+          </div>
+        ) : (
+          visible.map((t) => (
+            <article className={`card ${t.status.toLowerCase()}`} key={t.id}>
+              <div className="card-main">
+                <h3>{t.title}</h3>
+                {t.description && <p>{t.description}</p>}
+                <div className="meta">
+                  <span className={`badge ${t.priority.toLowerCase()}`}>{PRIORITY_LABEL[t.priority]}</span>
+                  <span>👤 {t.assignee}</span>
+                  <span>{fmtDate(t.created_at)}</span>
+                </div>
+              </div>
+              <div className="card-actions">
+                <select
+                  className={`status ${t.status.toLowerCase()}`}
+                  value={t.status}
+                  onChange={(e) => setTaskStatus(t, e.target.value)}
+                  aria-label={`Status of ${t.title}`}
+                >
+                  {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
+                </select>
+                <button className="btn small" onClick={() => setEditing(t)}>Edit</button>
+                <button className="btn small danger" onClick={() => remove(t)}>Delete</button>
+              </div>
+            </article>
+          ))
+        )}
+      </section>
+
+      {editing && (
+        <TaskForm
+          task={editing === 'new' ? null : editing}
+          onClose={() => setEditing(null)}
+          onSave={save}
+        />
+      )}
+      {toast && <div className="toast" role="status">{toast}</div>}
+    </div>
+  );
+}
+
+function Stat({ label, value, tone }) {
+  return (
+    <div className={`stat ${tone}`}>
+      <span className="stat-label">{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function TaskForm({ task, onClose, onSave }) {
+  const [form, setForm] = useState({
+    title: task?.title ?? '',
+    description: task?.description ?? '',
+    priority: task?.priority ?? 'MEDIUM',
+    status: task?.status ?? 'TODO',
+    assignee: task?.assignee ?? '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setErr('');
+    try {
+      await onSave({ ...form, title: form.title.trim(), assignee: form.assignee.trim() || 'Unassigned' }, task?.id);
+      onClose();
+    } catch (ex) {
+      setErr(ex.message);
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="backdrop" onMouseDown={onClose}>
+      <form className="modal" onSubmit={submit} onMouseDown={(e) => e.stopPropagation()}>
+        <h2>{task ? 'Edit task' : 'New task'}</h2>
+        <label>Title
+          <input value={form.title} onChange={set('title')} maxLength={200} required autoFocus />
+        </label>
+        <label>Description
+          <textarea rows={3} value={form.description} onChange={set('description')} />
+        </label>
+        <div className="row">
+          <label>Priority
+            <select value={form.priority} onChange={set('priority')}>
+              {Object.entries(PRIORITY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </label>
+          <label>Status
+            <select value={form.status} onChange={set('status')}>
+              {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
+            </select>
+          </label>
+        </div>
+        <label>Assignee
+          <input value={form.assignee} onChange={set('assignee')} placeholder="Unassigned" />
+        </label>
+        {err && <p className="form-error">{err}</p>}
+        <div className="actions">
+          <button type="button" className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn primary" disabled={saving || !form.title.trim()}>
+            {saving ? 'Saving…' : task ? 'Save changes' : 'Create task'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+createRoot(document.getElementById('root')).render(<App />);
